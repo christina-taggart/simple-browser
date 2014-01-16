@@ -2,15 +2,20 @@ require 'net/http'
 require 'nokogiri'
 
 class Page
-  attr_accessor :title, :links, :html, :nok_obj
+
+  attr_accessor :html
+
   def initialize(url = "http://www.alexleishman.com")
     @url = url
-    @html = ""
-    fetch!
+    fetch_url
+    create_nok_obj
   end
 
-  def fetch!
+  def fetch_url
     @html = Net::HTTP.get(URI(@url))
+  end
+
+  def create_nok_obj
     @nok_obj = Nokogiri::HTML(@html)
   end
 
@@ -20,9 +25,8 @@ class Page
 
   def links
     all_links = @nok_obj.css('a').map { |obj| obj['href'] }
-    relative_links = all_links.select { |link| link =~ /^\// }
+    relative_links = all_links.select { |link| link =~ /^\// || link =~ /#{@url}/ }.uniq.sort
   end
-
 end
 
 module Display
@@ -38,16 +42,22 @@ module Display
 
   def welcome
     puts <<-eos
+
     Welcome to the world's best web browser. This browser is much better than Chrome, Firefox and IE combined.
     Use at your own risk, don't be overwhelmed by the awesomeness!!!
 
     Created by Leishman Industries, Inc.
     Copyright 2014
+
+    Press 'q' to quit
+
     eos
   end
 
   def goodbye
+    system('clear')
     puts <<-eos
+
     Thank you for using our browser. I hope you enjoyed it :)
     eos
   end

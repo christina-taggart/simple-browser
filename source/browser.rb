@@ -2,64 +2,71 @@
 require_relative 'util'
 
 class Browser
+
   include Display
+
   def initialize
     @current_page = Page.new()
-    @exit_flag = true
+    @should_exit = false
   end
+
   def run!
     welcome
     run_user_session
     goodbye
   end
 
-  def run_user_session
-    while @exit_flag
-      print "url> "
+  private
+
+    def run_user_session
+      until @should_exit == true
         get_current_page
-        run_user_input
-    end
-  end
-
-  def get_current_page
-    input = gets.chomp
-    if input == 'q'
-      @exit_flag = false
-      return
-    end
-    @current_page = Page.new("http://#{input}")
-  end
-
-  def run_user_input
-    while true && @exit_flag
-      options_menu
-      input = gets.chomp.downcase
-      case input
-      when 't'
-        display_page_title
-      when 'l'
-        display_page_links
-      when 'h'
-        display_page_html
-      when 'b'
-        break
-      else
-        puts "Not valid input"
+        run_page_command
       end
     end
-  end
 
-  def display_page_title
-    puts "Title: #{@current_page.title}\n"
-  end
+    def get_url
+      print "url> "
+      @input = gets.chomp
+      @should_exit = true if @input == 'q'
+    end
 
-  def display_page_links
-    puts "Links: \n #{@current_page.links}\n"
-  end
+    def get_current_page
+      get_url
+      @current_page = Page.new("http://#{@input}") if @should_exit != true
+    end
 
-  def display_page_html
-    puts "HTML:\n#{@current_page.html}\n"
-  end
+    def run_page_command
+      while true && @should_exit == false
+        options_menu
+        input = gets.chomp.downcase
+        case input
+        when 't'
+          display_page_title
+        when 'l'
+          display_page_links
+        when 'h'
+          display_page_html
+        when 'b'
+          break
+        else
+          puts "Not valid input"
+        end
+      end
+    end
+
+    def display_page_title
+      puts "Title: #{@current_page.title}\n"
+    end
+
+    def display_page_links
+      puts "Links:\n"
+      @current_page.links.each{ |l| puts l}
+    end
+
+    def display_page_html
+      puts "HTML:\n#{@current_page.html}\n"
+    end
 end
 
 Browser.new.run!
