@@ -1,19 +1,25 @@
+require "net/http"
+require "uri"
+require "nokogiri"
+require 'open-uri'
+
 class Page
+
   def initialize(url)
+    @url = url
   end
-  
+
   def fetch!
+    return @doc  if @doc
+    response = open(@url)
+    @doc = Nokogiri::HTML(response)
   end
-  
+
   def title
+    fetch!.search('title').inner_text
   end
-  
+
   def links
-    # Research alert!
-    # How do you use Nokogiri to extract all the link URLs on a page?
-    #
-    # These should only be URLs that look like
-    #   <a href="http://somesite.com/page.html">Click here!</a>
-    # This would pull out "http://somesite.com/page.html"
+    fetch!.css('a').map { |link| link['href'] }.select { |link| link =~ /http/}
   end
 end
