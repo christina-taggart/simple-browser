@@ -5,15 +5,13 @@ require 'open-uri'
 require_relative 'util'
 
 class Browser
-    def initialize(url)
-        @page = Page.new(url)
+    def initialize(render,url)
+        @page = render.new(url)
     end
 
   def render_page
     puts "Fetching..."
-    puts "Title: #{@page.title}"
-    puts "Content Length: #{@page.content_length}"
-    puts "Links:\n#{@page.links}"
+    puts @page.to_console
   end
 
   def run!
@@ -22,5 +20,5 @@ class Browser
 
 end
 
-new_browser = Browser.new('http://www.cnn.com/2013/02/06/travel/private-jets/index.html')
+new_browser = Browser.new(Page,'http://www.cnn.com/2013/02/06/travel/private-jets/index.html')
 new_browser.run!

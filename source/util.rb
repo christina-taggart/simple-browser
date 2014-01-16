@@ -3,7 +3,6 @@ require 'nokogiri'
 require 'open-uri'
 
 class Page
-  attr_reader :url, :title, :content_length, :links
 
   def initialize(url)
     @url = fetch(url)
@@ -27,6 +26,10 @@ class Page
 
   def find_content_links
     @url.search('.cnn_strycntntlft > p > a:first-child').map { |link| link['href'] }.join("\n")
+  end
+
+  def to_console
+    "Title: #{@title}\nContent Length: #{@content_length}\nLinks:\n#{@links}"
   end
 
 end
