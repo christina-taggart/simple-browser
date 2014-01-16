@@ -1,20 +1,52 @@
 require 'net/http'
 require 'nokogiri'
+require 'open-uri'
+require 'uri'
+require 'pry'
 
 require_relative 'util'
 
 class Browser
-  def run!
-    # Run the browser
-    # Display a prompt for a user
-    # Parse their input
-    # Display useful results by instantiating
-    #   a new Page and calling methods on it.
-    
-    # Questions:
-    #  1. How can a user quit the browser gracefully?
-    #  2. How can a user ask for help, i.e., how do they know what commands are available to them?
+
+  def prompt_user
+    print "Type your url (ex: http://website.com/): "
+    @page = Page.new gets.chomp
   end
+
+  def run!
+    puts @page.url
+    puts @page.title
+    puts @page.links
+  end
+
 end
 
-Browser.new.run!
+
+class Page
+
+  def initialize(link)
+    @link = link
+  end
+
+  def fetch!
+    Nokogiri::HTML(open(@link))
+  end
+
+  def url
+    @link
+  end
+
+  def links
+    fetch!.css('a').map { |link| link['href'] }.reject { |e| e == '#' }
+  end
+
+  def title
+    "Title: #{fetch!.css('title').text}"
+  end
+
+end
+
+
+site = Browser.new
+site.prompt_user
+site.run!
