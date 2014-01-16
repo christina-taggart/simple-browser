@@ -4,16 +4,17 @@ require 'nokogiri'
 class Browser
   def initialize
     prompt_for_url
-    fetch_page
-    parse_page
+    @page = Page.new(@url)
+    @page.fetch!
+    @page.parse_page
     display_page
   end
 
   def display_page
-    puts "Title: #{@title}"
-    puts "Content-length: #{@content_length} characters"
+    puts "Title: #{@page.title}"
+    puts "Content-length: #{@page.content_length} characters"
     puts "Links: "
-    @links.each do |link| 
+    @page.links.each do |link| 
       puts link['href'] unless 
       (link['href'].nil? || link['href'].match(/^#/)) || link['href'].match(/^javascript/)
     end
@@ -22,11 +23,17 @@ class Browser
   private
   def prompt_for_url
     print "url> "
-    # TODO: find out why HTTPS websites dont work....
     @url = gets.chomp
   end
+end
 
-  def fetch_page
+class Page
+  attr_accessor :url, :title, :content_length, :links
+  def initialize(url)
+    @url = url
+  end
+
+  def fetch!
     uri = URI(@url)
     puts "\nFetching..."
     @html = Net::HTTP.get(uri)
